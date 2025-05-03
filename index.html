@@ -29,11 +29,10 @@
   }
   label { 
     display: block; 
-    margin: 8px 0; 
-    cursor: pointer; 
+    margin: 10px 0; 
+    cursor: pointer;
     text-align: left;
   }
-
   input[type="checkbox"] {
     cursor: pointer;
   }
@@ -100,7 +99,7 @@
   setInterval(updateWaktu, 1000);
   updateWaktu(); // update langsung saat load
 
-  // Semua ID checkbox yg ada
+  // Semua ID checklist
   const ids = [
     'bangunPagi', 'stretching', 'bacaBukuPagi', 'sarapan',
     'reviewPelajaran', 'belajarSNBP', 'editKontenSiang',
@@ -114,43 +113,47 @@
 
   function getTodayString() {
     const d = new Date();
-    return d.toISOString().slice(0,10);
+    return d.toISOString().slice(0,10); // format yyyy-mm-dd
   }
 
   function getColorByDate(dateStr) {
     const colors = [
-      '#1abc9c', '#3498db', '#9b59b6', '#e67e22', '#e74c3c',
-      '#2ecc71', '#34495e', '#16a085', '#f39c12', '#d35400',
-      '#27ae60', '#8e44ad'
+      '#f39c12', '#1abc9c', '#3498db', '#9b59b6', '#e67e22',
+      '#e74c3c', '#34495e', '#16a085', '#d35400', '#27ae60',
+      '#8e44ad', '#2ecc71'
     ];
-
     let hash = 0;
-    for(let i=0; i<dateStr.length; i++){
+    for (let i = 0; i < dateStr.length; i++) {
       hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
     }
-
-    const index = Math.abs(hash) % colors.length;
-    return colors[index];
+    return colors[Math.abs(hash) % colors.length];
   }
 
   function loadChecklist() {
     const savedDate = localStorage.getItem(DATE_KEY);
     const today = getTodayString();
 
+    // Debugging log untuk memastikan tanggal
+    console.log("Saved Date:", savedDate);
+    console.log("Today's Date:", today);
+
+    // Set warna latar harian
     document.body.style.backgroundColor = getColorByDate(today);
 
-    if(savedDate !== today) {
-      ids.forEach(id => document.getElementById(id).checked = false);
-      localStorage.setItem(DATE_KEY, today);
-      localStorage.removeItem(CHECKLIST_KEY);
-      saveChecklist();
+    if (savedDate !== today) {
+      console.log("Hari baru, reset checklist!");
+      ids.forEach(id => document.getElementById(id).checked = false); // Reset semua checkbox
+      localStorage.setItem(DATE_KEY, today); // Simpan tanggal baru
+      localStorage.removeItem(CHECKLIST_KEY); // Hapus status checklist lama
+      saveChecklist(); // Simpan default kosong
     } else {
+      console.log("Load status checklist sebelumnya");
       let status = localStorage.getItem(CHECKLIST_KEY);
-      if(status) {
+      if (status) {
         status = JSON.parse(status);
         ids.forEach(id => {
           const checked = status[id];
-          if(typeof checked === 'boolean'){
+          if (typeof checked === 'boolean') {
             document.getElementById(id).checked = checked;
           }
         });
@@ -166,22 +169,11 @@
     localStorage.setItem(CHECKLIST_KEY, JSON.stringify(status));
   }
 
-  function vibrateOnCheck(event) {
-    if(event.target.checked && navigator.vibrate){
-      navigator.vibrate(100);
-    }
-  }
-
   ids.forEach(id => {
-    const cb = document.getElementById(id);
-    cb.addEventListener('change', e => {
-      saveChecklist();
-      vibrateOnCheck(e);
-    });
+    document.getElementById(id).addEventListener('change', saveChecklist);
   });
 
   loadChecklist();
-
 </script>
 
 </body>
