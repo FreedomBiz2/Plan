@@ -12,15 +12,26 @@
     padding: 10px;
     transition: background-color 0.5s ease; /* transisi warna background */
     color: #fff;
+    text-align: center;
+  }
+  #waktu {
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  h1 {
+    margin-bottom: 20px;
   }
   h2 { 
     border-bottom: 1px solid rgba(255,255,255,0.3); 
     padding-bottom: 5px; 
+    text-align: left;
   }
   label { 
     display: block; 
     margin: 8px 0; 
     cursor: pointer; 
+    text-align: left;
   }
 
   input[type="checkbox"] {
@@ -29,6 +40,8 @@
 </style>
 </head>
 <body>
+
+<div id="waktu">Memuat waktu...</div>
 
 <h1>Jadwal Harian untuk Izzulhaq</h1>
 
@@ -69,6 +82,24 @@
 </section>
 
 <script>
+  // Tampilkan jam dan hari dalam Bahasa Indonesia, update setiap detik
+  function updateWaktu() {
+    const el = document.getElementById('waktu');
+    const now = new Date();
+
+    const hariNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const hari = hariNames[now.getDay()];
+
+    // Format jam:menit:detik dengan dua digit
+    const jam = String(now.getHours()).padStart(2, '0');
+    const menit = String(now.getMinutes()).padStart(2, '0');
+    const detik = String(now.getSeconds()).padStart(2, '0');
+
+    el.textContent = `${hari}, ${jam}:${menit}:${detik}`;
+  }
+  setInterval(updateWaktu, 1000);
+  updateWaktu(); // update langsung saat load
+
   // Semua ID checkbox yg ada
   const ids = [
     'bangunPagi', 'stretching', 'bacaBukuPagi', 'sarapan',
@@ -81,31 +112,18 @@
   const DATE_KEY = 'jadwal_tanggal';
   const CHECKLIST_KEY = 'jadwal_status';
 
-  // Fungsi dapatkan string tanggal hari ini (yyyy-mm-dd)
   function getTodayString() {
     const d = new Date();
     return d.toISOString().slice(0,10);
   }
 
-  // Fungsi untuk pilih warna latar hari ini berdasarkan tanggal agar warna stabil selama hari itu
   function getColorByDate(dateStr) {
-    // Array warna cerah dan kontras (agar teks tetap terbaca)
     const colors = [
-      '#1abc9c', // turquoise
-      '#3498db', // blue
-      '#9b59b6', // purple
-      '#e67e22', // orange
-      '#e74c3c', // red
-      '#2ecc71', // green
-      '#34495e', // dark blue-gray
-      '#16a085', // dark turquoise
-      '#f39c12', // yellow-orange
-      '#d35400', // dark orange
-      '#27ae60', // dark green
-      '#8e44ad'  // dark purple
+      '#1abc9c', '#3498db', '#9b59b6', '#e67e22', '#e74c3c',
+      '#2ecc71', '#34495e', '#16a085', '#f39c12', '#d35400',
+      '#27ae60', '#8e44ad'
     ];
 
-    // Hitung hash sederhana dari tanggal (agar sama setiap hari)
     let hash = 0;
     for(let i=0; i<dateStr.length; i++){
       hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
@@ -115,22 +133,18 @@
     return colors[index];
   }
 
-  // Load checklist dari localStorage atau reset kalau hari baru
   function loadChecklist() {
     const savedDate = localStorage.getItem(DATE_KEY);
     const today = getTodayString();
 
-    // Set background warna berdasarkan tanggal hari ini
     document.body.style.backgroundColor = getColorByDate(today);
 
     if(savedDate !== today) {
-      // Hari baru > reset checklist, simpan tanggal baru
       ids.forEach(id => document.getElementById(id).checked = false);
       localStorage.setItem(DATE_KEY, today);
       localStorage.removeItem(CHECKLIST_KEY);
-      saveChecklist(); // simpan default kosong
+      saveChecklist();
     } else {
-      // Load status dari localStorage
       let status = localStorage.getItem(CHECKLIST_KEY);
       if(status) {
         status = JSON.parse(status);
@@ -144,7 +158,6 @@
     }
   }
 
-  // Simpan checklist ke localStorage
   function saveChecklist() {
     const status = {};
     ids.forEach(id => {
@@ -153,14 +166,12 @@
     localStorage.setItem(CHECKLIST_KEY, JSON.stringify(status));
   }
 
-  // Fungsi getar device saat checkbox dicentang (jika mendukung dan dicentang)
   function vibrateOnCheck(event) {
     if(event.target.checked && navigator.vibrate){
-      navigator.vibrate(100);  // getar selama 100ms
+      navigator.vibrate(100);
     }
   }
 
-  // Pasang event listener pada setiap checkbox
   ids.forEach(id => {
     const cb = document.getElementById(id);
     cb.addEventListener('change', e => {
@@ -172,6 +183,6 @@
   loadChecklist();
 
 </script>
+
 </body>
 </html>
-  
