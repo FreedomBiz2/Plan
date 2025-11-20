@@ -1,391 +1,366 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Jadwal Harian Izzulhaq</title>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-<style>
-  body { 
-    font-family: Arial, sans-serif; 
-    max-width: 600px; 
-    margin: 20px auto; 
-    padding: 10px;
-    transition: background-color 0.5s ease; /* transisi warna background */
-    color: #fff;
-    text-align: center;
-  }
-  #waktu {
-    font-size: 1.2rem;
-    margin-bottom: 12px;
-    font-weight: 600;
-  }
-  h1 {
-    margin-bottom: 10px;
-  }
-  /* Styling untuk quotes */
-  .quotes {
-    font-style: italic;
-    margin-bottom: 20px;
-    padding: 10px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 5px;
-    font-size: 0.9rem;
-  }
-  .author {
-    font-weight: bold;
-    display: block;
-    margin-top: 5px;
-    font-size: 0.8rem;
-  }
-  h2 { 
-    border-bottom: 1px solid rgba(255,255,255,0.3); 
-    padding-bottom: 5px; 
-    text-align: left;
-  }
-  label { 
-    display: block; 
-    margin: 10px 0; 
-    cursor: pointer;
-    text-align: left;
-  }
-  input[type="checkbox"] {
-    cursor: pointer;
-  }
-  
-  /* Styling untuk label dengan checkbox yang dicentang */
-  label input[type="checkbox"]:checked + span {
-    color: #a3e4d7;
-    text-decoration: line-through;
-    transition: all 0.3s ease;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracker UTBK 2026</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
 
-  /* Container untuk teks label */
-  .task-text {
-    display: inline-block;
-    transition: transform 0.2s ease, color 0.3s ease;
-    padding-left: 5px;
-  }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
 
-  /* Animasi untuk label yang baru dicentang */
-  @keyframes taskComplete {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-  }
+        /* HEADER & COUNTDOWN */
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+        h1 { color: #2C5F2D; margin: 0; }
+        
+        .countdown {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #d9534f;
+            margin-top: 10px;
+            background: #fff0f0;
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 25px;
+            border: 1px solid #ffd6d6;
+        }
 
-  .task-complete-animation {
-    animation: taskComplete 0.4s ease;
-  }
-  
-  /* Styling untuk tombol reset */
-  #resetButton {
-    background-color: rgba(231, 76, 60, 0.8);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    margin-top: 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: all 0.3s ease;
-    display: none; /* Sembunyikan secara default */
-  }
-  
-  #resetButton:hover {
-    background-color: rgba(231, 76, 60, 1);
-    transform: scale(1.05);
-  }
-  
-  #resetButton.show {
-    display: inline-block;
-    animation: fadeIn 0.5s ease;
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  
-  /* Styling untuk tombol vibrate */
-  #vibrateButton {
-    background: none;
-    border: none;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 1.5rem;
-    cursor: pointer;
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    transition: color 0.3s ease;
-  }
-  
-  #vibrateButton:hover {
-    color: rgba(255, 255, 255, 1);
-  }
-</style>
+        /* NAVIGASI */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        button {
+            padding: 12px 25px;
+            cursor: pointer;
+            background: #eee;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #555;
+            transition: 0.3s;
+        }
+        button.active {
+            background: #2C5F2D;
+            color: white;
+            box-shadow: 0 4px 8px rgba(44, 95, 45, 0.3);
+        }
+
+        /* HALAMAN */
+        .page { display: none; animation: fadeIn 0.5s; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* JADWAL GRID */
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        .day-col {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #fff;
+            transition: transform 0.3s;
+        }
+        
+        /* FITUR HIGHLIGHT HARI INI */
+        .day-col.hari-ini {
+            border: 2px solid #2C5F2D;
+            box-shadow: 0 0 15px rgba(44, 95, 45, 0.2);
+            transform: scale(1.02);
+            z-index: 10;
+        }
+        .day-col.hari-ini .day-head {
+            background: #2C5F2D; /* Hijau Tua */
+            color: #FFE77A; /* Kuning */
+        }
+        .today-badge {
+            display: none;
+            font-size: 0.7em;
+            background: #FFE77A;
+            color: #2C5F2D;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-top: 5px;
+        }
+        .day-col.hari-ini .today-badge { display: inline-block; }
+
+        .day-head {
+            background: #97BC62;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+        }
+        .slot {
+            padding: 10px;
+            font-size: 0.85em;
+            border-bottom: 1px solid #f9f9f9;
+        }
+        .slot strong { display: block; color: #333; margin-bottom: 4px; }
+        .slot span { color: #666; font-size: 0.9em; }
+
+        /* CHECKLIST STYLE */
+        .progress-area {
+            background: linear-gradient(to right, #2C5F2D, #97BC62);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .subject-group { margin-bottom: 25px; }
+        .subject-title {
+            font-size: 1.2em;
+            color: #2C5F2D;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 12px;
+            padding-bottom: 5px;
+            font-weight: bold;
+        }
+        .check-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .check-item:hover { background: #f5f5f5; }
+        .check-item input { 
+            margin-right: 12px; 
+            width: 18px; 
+            height: 18px; 
+            accent-color: #2C5F2D; 
+        }
+        .done { text-decoration: line-through; color: #bbb; }
+        
+        /* INFO FOOTER */
+        .footer-info {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.8em;
+            color: #888;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+    </style>
 </head>
 <body>
 
-<!-- Tombol Vibrate -->
-<button id="vibrateButton">📳</button>
+<div class="container">
+    <header>
+        <h1>🎯 Target UTBK 2026</h1>
+        <div class="countdown" id="countdownText">Loading...</div>
+    </header>
 
-<div id="waktu">Memuat waktu...</div>
+    <div class="tabs">
+        <button class="active" onclick="bukaTab('jadwal', this)">📅 Jadwal Belajar</button>
+        <button onclick="bukaTab('materi', this)">✅ Checklist Materi</button>
+    </div>
 
-<h1>Jadwal Harian untuk Izzulhaq</h1>
+    <div id="jadwal" class="page active">
+        <div class="schedule-grid" id="gridJadwal">
+            <div class="day-col" data-hari="1">
+                <div class="day-head">Senin <br><span class="today-badge">HARI INI</span></div>
+                <div class="slot"><strong>09.00 - 12.00</strong><span>Materi PU (Logika)</span></div>
+                <div class="slot"><strong>13.00 - 17.00</strong><span>Latihan Soal PU</span></div>
+                <div class="slot"><strong>19.30 - 22.30</strong><span>Review & Berita</span></div>
+            </div>
+            <div class="day-col" data-hari="2">
+                <div class="day-head">Selasa <br><span class="today-badge">HARI INI</span></div>
+                <div class="slot"><strong>09.00 - 12.00</strong><span>Materi PK (Aljabar)</span></div>
+                <div class="slot"><strong>13.00 - 17.00</strong><span>Drilling Rumus</span></div>
+                <div class="slot"><strong>19.30 - 22.30</strong><span>Latihan Dasar MTK</span></div>
+            </div>
+            <div class="day-col" data-hari="3">
+                <div class="day-head">Rabu <br><span class="today-badge">HARI INI</span></div>
+                <div class="slot"><strong>09.00 - 12.00</strong><span>Materi PPU (Indo)</span></div>
+                <div class="slot"><strong>13.00 - 17.00</strong><span>Analisis Teks</span></div>
+                <div class="slot"><strong>19.30 - 22.30</strong><span>Bedah Ejaan (PUEBI)</span></div>
+            </div>
+            <div class="day-col" data-hari="4">
+                <div class="day-head">Kamis <br><span class="today-badge">HARI INI</span></div>
+                <div class="slot"><strong>09.00 - 12.00</strong><span>Materi Inggris</span></div>
+                <div class="slot"><strong>13.00 - 17.00</strong><span>Reading Practice</span></div>
+                <div class="slot"><strong>19.30 - 22.30</strong><span>Vocab & Grammar</span></div>
+            </div>
+            <div class="day-col" data-hari="5">
+                <div class="day-head">Jumat <br><span class="today-badge">HARI INI</span></div>
+                <div class="slot"><strong>09.00 - 11.00</strong><span>Materi PM (Matdas)</span></div>
+                <div class="slot"><strong>13.30 - 17.00</strong><span>Soal Cerita & Data</span></div>
+                <div class="slot"><strong>19.30 - 22.30</strong><span>Evaluasi Mingguan</span></div>
+            </div>
+            <div class="day-col" data-hari="6">
+                <div class="day-head" style="background:#d9534f;">Sabtu <br><span class="today-badge">HARI INI</span></div>
+                <div class="slot"><strong>09.00 - 12.00</strong><span>SIMULASI / TRYOUT</span></div>
+                <div class="slot"><strong>13.00 - 15.00</strong><span>Analisis Salah</span></div>
+                <div class="slot"><strong>Malam</strong><span>LIBUR / Free Time</span></div>
+            </div>
+            <div class="day-col" data-hari="0">
+                <div class="day-head" style="background:#f0ad4e;">Minggu <br><span class="today-badge">HARI INI</span></div>
+                <div class="slot"><strong>Pagi - Sore</strong><span>Olahraga / Hobi</span></div>
+                <div class="slot"><strong>Malam</strong><span>Susun Rencana Esok</span></div>
+            </div>
+        </div>
+    </div>
 
-<div class="quotes">
-  "PERUBAHAN KECIL YANG MEMBERIKAN HASIL LUAR BIASA"
-  <span class="author">— James Clear</span>
+    <div id="materi" class="page">
+        <div class="progress-area" id="progressInfo">Progress: 0%</div>
+        <div id="listMateri"></div>
+    </div>
+
+    <div class="footer-info">
+        Semangat semoga bisa masuk PTN impian.
+    </div>
 </div>
 
-<section>
-  <h2>Pagi (Before School)</h2>
-  <label><input type="checkbox" id="bangunPagi" /><span class="task-text">Bangun Pagi: 06.00</span></label>
-  <label><input type="checkbox" id="stretching" /><span class="task-text">Stretching Ringan / Olahraga Singkat (5–10 menit)</span></label>
-  <label><input type="checkbox" id="bacaBukuPagi" /><span class="task-text">Baca Buku (Atomic Habits atau Rich Dad Poor Dad, 10–15 menit)</span></label>
-  <label><input type="checkbox" id="sarapan" /><span class="task-text">Sarapan + Persiapan ke Sekolah</span></label>
-</section>
-
-<section>
-  <h2>Siang (After School)</h2>
-  <label><input type="checkbox" id="reviewPelajaran" /><span class="task-text">Review Pelajaran Sekolah: Fokus pelajaran teknik (minimal 20 menit)</span></label>
-  <label><input type="checkbox" id="belajarSNBP" /><span class="task-text">Belajar Materi SNBP/SNBT (40 menit)</span></label>
-  <label><input type="checkbox" id="editKontenSiang" /><span class="task-text">Edit Konten (30–45 menit)</span></label>
-</section>
-
-<section>
-  <h2>Sore</h2>
-  <label><input type="checkbox" id="olahragaSore" /><span class="task-text">Olahraga: Workout ringan atau lari (20–30 menit)</span></label>
-  <label><input type="checkbox" id="belajarInggris" /><span class="task-text">Belajar Bahasa Inggris (20 menit)</span></label>
-  <label><input type="checkbox" id="crypto" /><span class="task-text">Crypto: Belajar tentang crypto atau blockchain (20 menit)</span></label>
-  <label><input type="checkbox" id="bacaTeknik" /><span class="task-text">Baca Artikel/Buku Teknik (20 menit)</span></label>
-</section>
-
-<section>
-  <h2>Malam (Before Sleep)</h2>
-  <label><input type="checkbox" id="kerjakanSoal" /><span class="task-text">Kerjakan Soal SNBP/SNBT (20 menit)</span></label>
-  <label><input type="checkbox" id="editKontenMalam" /><span class="task-text">Lanjut Edit Konten (30 menit)</span></label>
-  <label><input type="checkbox" id="cekProgress" /><span class="task-text">Cek Progress Checklist & Catatan</span></label>
-</section>
-
-<section>
-  <h2>Before Bed</h2>
-  <label><input type="checkbox" id="meditasi" /><span class="task-text">Meditasi atau Relax (5 menit)</span></label>
-  <label><input type="checkbox" id="tidur" /><span class="task-text">Tidur pukul 22.00 – 22.30</span></label>
-</section>
-
-<!-- Tombol Reset -->
-<button id="resetButton">Reset Semua Tugas</button>
-
 <script>
-  // Status getaran (vibration)
-  let vibrationEnabled = true;
+    // 1. SET TANGGAL UTBK (Ubah disini jika perlu)
+    const targetDate = new Date("April 21, 2026 00:00:00").getTime();
 
-  // Fungsi untuk menghasilkan getaran (vibration)
-  function vibrate(pattern) {
-    if (vibrationEnabled && 'vibrate' in navigator) {
-      try {
-        navigator.vibrate(pattern);
-      } catch (e) {
-        console.log("Getaran tidak didukung di perangkat ini atau izin getaran ditolak");
-      }
-    }
-  }
-  
-  // Event listener untuk tombol vibrate
-  document.getElementById('vibrateButton').addEventListener('click', function() {
-    vibrationEnabled = !vibrationEnabled;
-    this.textContent = vibrationEnabled ? '📳' : '📴';
-    
-    // Getaran singkat untuk menunjukkan perubahan status
-    if (vibrationEnabled) {
-      vibrate(100);
-    }
-  });
+    // 2. UPDATE WAKTU & DETEKSI HARI INI
+    function updateTime() {
+        const now = new Date();
+        const nowTime = now.getTime();
+        const sisa = targetDate - nowTime;
 
-  // Tampilkan jam dan hari dalam Bahasa Indonesia, update setiap detik
-  function updateWaktu() {
-    const el = document.getElementById('waktu');
-    const now = new Date();
-
-    const hariNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-    const hari = hariNames[now.getDay()];
-
-    // Format jam:menit:detik dengan dua digit
-    const jam = String(now.getHours()).padStart(2, '0');
-    const menit = String(now.getMinutes()).padStart(2, '0');
-    const detik = String(now.getSeconds()).padStart(2, '0');
-
-    el.textContent = `${hari}, ${jam}:${menit}:${detik}`;
-  }
-  setInterval(updateWaktu, 1000);
-  updateWaktu(); // update langsung saat load
-
-  // Semua ID checklist
-  const ids = [
-    'bangunPagi', 'stretching', 'bacaBukuPagi', 'sarapan',
-    'reviewPelajaran', 'belajarSNBP', 'editKontenSiang',
-    'olahragaSore', 'belajarInggris', 'crypto', 'bacaTeknik',
-    'kerjakanSoal', 'editKontenMalam', 'cekProgress',
-    'meditasi', 'tidur'
-  ];
-
-  const DATE_KEY = 'jadwal_tanggal';
-  const CHECKLIST_KEY = 'jadwal_status';
-  const VIBRATION_KEY = 'jadwal_vibration';
-
-  function getTodayString() {
-    const d = new Date();
-    return d.toISOString().slice(0,10); // format yyyy-mm-dd
-  }
-
-  function getColorByDate(dateStr) {
-    const colors = [
-      '#f39c12', '#1abc9c', '#3498db', '#9b59b6', '#e67e22',
-      '#e74c3c', '#34495e', '#16a085', '#d35400', '#27ae60',
-      '#8e44ad', '#2ecc71'
-    ];
-    let hash = 0;
-    for (let i = 0; i < dateStr.length; i++) {
-      hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return colors[Math.abs(hash) % colors.length];
-  }
-
-  function loadChecklist() {
-    const savedDate = localStorage.getItem(DATE_KEY);
-    const today = getTodayString();
-
-    // Debugging log untuk memastikan tanggal
-    console.log("Saved Date:", savedDate);
-    console.log("Today's Date:", today);
-
-    // Set warna latar harian
-    document.body.style.backgroundColor = getColorByDate(today);
-
-    if (savedDate !== today) {
-      console.log("Hari baru, reset checklist!");
-      ids.forEach(id => document.getElementById(id).checked = false); // Reset semua checkbox
-      localStorage.setItem(DATE_KEY, today); // Simpan tanggal baru
-      localStorage.removeItem(CHECKLIST_KEY); // Hapus status checklist lama
-      saveChecklist(); // Simpan default kosong
-    } else {
-      console.log("Load status checklist sebelumnya");
-      let status = localStorage.getItem(CHECKLIST_KEY);
-      if (status) {
-        status = JSON.parse(status);
-        ids.forEach(id => {
-          const checked = status[id];
-          if (typeof checked === 'boolean') {
-            document.getElementById(id).checked = checked;
-          }
-        });
-      }
-    }
-    
-    // Load pengaturan getaran
-    const savedVibrationSetting = localStorage.getItem(VIBRATION_KEY);
-    if (savedVibrationSetting !== null) {
-      vibrationEnabled = savedVibrationSetting === 'true';
-      document.getElementById('vibrateButton').textContent = vibrationEnabled ? '📳' : '📴';
-    }
-    
-    // Periksa status tombol reset
-    checkAllTasksCompleted();
-  }
-
-  function saveChecklist() {
-    const status = {};
-    ids.forEach(id => {
-      status[id] = document.getElementById(id).checked;
-    });
-    localStorage.setItem(CHECKLIST_KEY, JSON.stringify(status));
-    
-    // Simpan pengaturan getaran
-    localStorage.setItem(VIBRATION_KEY, vibrationEnabled.toString());
-  }
-
-  // Fungsi untuk menangani animasi saat checkbox dicentang
-  function setupAnimations() {
-    ids.forEach(id => {
-      const checkbox = document.getElementById(id);
-      checkbox.addEventListener('change', function() {
-        if (this.checked) {
-          // Dapatkan elemen span yang mengikuti checkbox
-          const textSpan = this.nextElementSibling;
-          // Tambahkan kelas animasi
-          textSpan.classList.add('task-complete-animation');
-          // Hapus kelas setelah animasi selesai
-          setTimeout(() => {
-            textSpan.classList.remove('task-complete-animation');
-          }, 500);
-          
-          // Getaran untuk tugas yang dicentang
-          vibrate([50]);
+        // Hitung Mundur
+        if (sisa > 0) {
+            const hari = Math.floor(sisa / (1000 * 60 * 60 * 24));
+            const jam = Math.floor((sisa % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            document.getElementById("countdownText").innerText = 
+                `${hari} Hari ${jam} Jam Menuju UTBK`;
+        } else {
+            document.getElementById("countdownText").innerText = "WAKTUNYA UTBK! SEMANGAT!";
         }
-      });
-    });
-  }
 
-  // Fungsi untuk memeriksa apakah semua tugas sudah selesai
-  function checkAllTasksCompleted() {
-    const allTasks = ids.map(id => document.getElementById(id).checked);
-    const allCompleted = allTasks.every(task => task === true);
-    const resetButton = document.getElementById('resetButton');
-    
-    if (allCompleted) {
-      // Jalankan efek konfeti
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-      
-      // Getaran panjang untuk memberitahu semua tugas selesai
-      vibrate([100, 50, 100, 50, 100]);
-      
-      // Tampilkan tombol reset
-      resetButton.classList.add('show');
-    } else {
-      // Sembunyikan tombol reset jika tidak semua tugas selesai
-      resetButton.classList.remove('show');
+        // Highlight Hari Ini
+        const hariIni = now.getDay(); // 0=Minggu, 1=Senin, dst
+        document.querySelectorAll('.day-col').forEach(col => {
+            // Reset dulu
+            col.classList.remove('hari-ini');
+            // Cek data-hari
+            if (parseInt(col.getAttribute('data-hari')) === hariIni) {
+                col.classList.add('hari-ini');
+            }
+        });
     }
-  }
-
-  // Fungsi untuk mereset semua tugas
-  function resetAllTasks() {
-    ids.forEach(id => {
-      document.getElementById(id).checked = false;
-    });
-    saveChecklist();
-    checkAllTasksCompleted(); // Sembunyikan tombol reset
     
-    // Getaran untuk reset
-    vibrate([200, 100, 200]);
+    setInterval(updateTime, 1000); // Update tiap detik
+    updateTime(); // Jalankan langsung
+
+    // 3. DATA MATERI (DATABASE)
+    const dataMateri = {
+        "Penalaran Umum (PU)": [
+            "Logika: Ponens, Tollens, Silogisme", "Simpulan Logis",
+            "Pola Barisan Angka", "Pola Huruf", "Operasi Aritmatika Dasar",
+            "Diagram Venn", "Hubungan Sebab Akibat"
+        ],
+        "Pengetahuan Kuantitatif (PK)": [
+            "Aljabar & Persamaan Linear", "Fungsi Kuadrat & Grafik", 
+            "Bangun Datar & Ruang", "Sudut & Garis",
+            "Statistika Dasar", "Peluang", "Matriks & Vektor"
+        ],
+        "B. Indonesia (PPU & Literasi)": [
+            "Ide Pokok & Gagasan Utama", "Ejaan (PUEBI) & Tanda Baca",
+            "Kalimat Efektif (SPOK)", "Kata Sambung (Konjungsi)",
+            "Analisis Teks & Makna Tersirat"
+        ],
+        "B. Inggris (Literasi)": [
+            "Main Idea & Topic", "Explicit Information", "Author's Attitude/Tone",
+            "Synonym & Reference", "Inference/Conclusion"
+        ],
+        "Penalaran Matematika": [
+            "Aritmatika Sosial (Diskon/Pajak)", "Membaca Grafik/Tabel",
+            "Rasio & Perbandingan", "Kecepatan, Jarak, Waktu",
+            "Geometri Terapan"
+        ]
+    };
+
+    // 4. GENERATE CHECKLIST
+    const listDiv = document.getElementById("listMateri");
+    let totalItem = 0;
     
-    // Animasi konfirmasi reset
-    confetti({
-      particleCount: 30,
-      spread: 100,
-      origin: { y: 0.8 },
-      colors: ['#e74c3c', '#f39c12', '#e67e22'] // Warna merah/oranye untuk reset
-    });
-  }
+    for (let mapel in dataMateri) {
+        let html = `<div class="subject-group"><div class="subject-title">${mapel}</div>`;
+        dataMateri[mapel].forEach((topik, index) => {
+            // Buat ID unik tanpa spasi
+            const id = mapel.replace(/[^a-zA-Z0-9]/g, '') + index; 
+            
+            // Cek penyimpanan lokal
+            const checked = localStorage.getItem(id) === 'true' ? 'checked' : '';
+            const style = checked ? 'done' : '';
+            
+            html += `
+                <label class="check-item">
+                    <input type="checkbox" id="${id}" ${checked} onchange="simpan('${id}')">
+                    <span id="text-${id}" class="${style}">${topik}</span>
+                </label>
+            `;
+            totalItem++;
+        });
+        html += `</div>`;
+        listDiv.innerHTML += html;
+    }
 
-  // Atur event listeners untuk checkbox
-  ids.forEach(id => {
-    document.getElementById(id).addEventListener('change', function() {
-      saveChecklist();
-      checkAllTasksCompleted();
-    });
-  });
+    // 5. FUNGSI SIMPAN & PROGRESS
+    function simpan(id) {
+        const checkbox = document.getElementById(id);
+        const text = document.getElementById("text-" + id);
+        
+        localStorage.setItem(id, checkbox.checked);
+        
+        if(checkbox.checked) text.classList.add("done");
+        else text.classList.remove("done");
 
-  // Tambah event listener untuk tombol reset
-  document.getElementById('resetButton').addEventListener('click', resetAllTasks);
+        hitungProgress();
+    }
 
-  loadChecklist();
-  setupAnimations();
+    function hitungProgress() {
+        let checkedCount = 0;
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(box => {
+            if(box.checked) checkedCount++;
+        });
+        
+        const persen = Math.round((checkedCount / totalItem) * 100);
+        document.getElementById("progressInfo").innerText = `🔥 Progress Kamu: ${persen}% Selesai`;
+    }
+    hitungProgress();
+
+    // 6. NAVIGASI TAB
+    function bukaTab(namaTab, btn) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        document.getElementById(namaTab).classList.add('active');
+        btn.classList.add('active');
+    }
 </script>
 
 </body>
